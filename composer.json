@@ -1,0 +1,14 @@
+{
+    "name": "xenice/xenice-member",
+    "description": "",
+    "authors": [
+        {
+            "name": "xenice",
+            "email": "site@xenice.com"
+        }
+    ],
+    "require": {
+		"yurunsoft/pay-sdk": "~3.0",
+		"yurunsoft/yurun-oauth-login": "~3.0"
+	}
+}
