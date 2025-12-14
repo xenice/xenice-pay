@@ -26,6 +26,7 @@ class Config extends Options
             'submit'=>__('Save Changes','xenice-pay'),
             'title'=> __('Pay Settings', 'xenice-pay'),
             'tabs' => [
+                /*
                 [
                     'id' => 'wechat_pay',
                     'title' => __('Wechat Pay', 'xenice-pay'),
@@ -62,13 +63,14 @@ class Config extends Options
                         ],
                     ]
                 ], #wechat pay
+                */
                 [
                     'id' => 'alipay',
                     'title' => __('Alipay', 'xenice-pay'),
                     'fields'=>[
                         [
                             'name'=>__('Alipay', 'xenice-pay'),
-                            'desc' => sprintf(__('<a href="%s" target="_blank">Apply for</a> payment interface. <a onclick="xenice_pay_copy(this);return false;" href="%s/wp-json/xe/v1/pay/alipayNotify">Copy</a> Callback URL.'),'https://open.alipay.com/',home_url()),
+                            'desc' => sprintf(__('<a href="%s" target="_blank">Apply for</a> payment interface. <a onclick="xenice_pay_copy(this);return false;" href="%s/wp-json/xe/v1/pay-notify/alipay">Copy</a> Callback URL.'),'https://open.alipay.com/',home_url()),
                             'fields'=>[
                                 [
                                     'id'   => 'enable_alipay',
@@ -106,12 +108,13 @@ class Config extends Options
                         ],
                     ], 
                 ], // # alipay
+                /*
                 [
                     'id' => 'xunhupay',
                     'title' => __('Xunhupay', 'xenice-pay'),
                     'fields'=>[
                         [
-                            'name' => __('Xunhupay'),
+                            'name' => __('Wechat Xunhupay', 'xenice-pay'),
                             'desc' => sprintf(__('<a href="%s" target="_blank">Apply for</a> xunhupay official wechat personal payment account.',  'xenice-pay'), 'https://www.xunhupay.com/'),
                             'fields'=>[
                                 [
@@ -135,7 +138,7 @@ class Config extends Options
                             ]  
                         ],
                     ]
-                ],
+                ],*/
                 /*
                 [
                     'id' => 'global',

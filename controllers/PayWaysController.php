@@ -194,6 +194,7 @@ class PayWaysController extends \WP_REST_Controller{
 	    $data = null;
 
 	    switch($request['pay_way']){
+	        /*
             case 'wechat_h5': // 微信H5支付
                 $enable = get('enable_wehcat_pay');
                 $appid = get('wehcat_pay_appid');
@@ -272,6 +273,7 @@ class PayWaysController extends \WP_REST_Controller{
                 
                 $data = (new WechatPay($appid, $mch_id, $key))->miniPay($args);
                 break;
+            */
             case 'alipay_f2f': // 支付宝当面付
                 $enable = get('enable_alipay');
                 $appid = get('alipay_appid');
@@ -324,14 +326,12 @@ class PayWaysController extends \WP_REST_Controller{
                 
                 $data = (new Alipay($appid, $public_key, $private_key))->phonePay($args);
                 break;
-            /*case 'alipay_phone':
-                $order->insert($row);
-                (new Alipay)->phonePay($data);
-                break;
+            /*
             case 'alipay_pc':
                 $order->insert($row);
                 (new Alipay)->pcPay($data);
                 break;*/
+            
             case 'xunhupay_wechat':
                 
                 $enable = get('enable_xunhupay_wechat');

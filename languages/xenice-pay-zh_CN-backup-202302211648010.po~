@@ -1,0 +1,112 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Xenice Pay\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-02-21 08:29+0000\n"
+"PO-Revision-Date: 2023-02-21 08:47+0000\n"
+"Last-Translator: \n"
+"Language-Team: 简体中文\n"
+"Language: zh_CN\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.6.3; wp-6.1.1\n"
+"X-Domain: xenice-pay"
+
+#: Config.php:117
+#, php-format
+msgid ""
+"<a href=\"%s\" target=\"_blank\">Apply for</a> xunhupay official wechat "
+"personal payment account."
+msgstr "<a href=\"%s\" target=\"_blank\">申请</a>虎皮椒官方微信个人支付账号。"
+
+#: Config.php:69 Config.php:72 controllers/PayWaysController.php:124
+#: controllers/PayWaysController.php:149 controllers/PayWaysController.php:167
+#: controllers/PayWaysController.php:174
+msgid "Alipay"
+msgstr "支付宝"
+
+#: Config.php:95
+msgid "Alipay public key"
+msgstr "支付宝公钥"
+
+#: Config.php:89 Config.php:129
+msgid "APP ID"
+msgstr ""
+
+#: Config.php:102
+msgid "App private key"
+msgstr "应用私钥"
+
+#: Config.php:135
+msgid "APP Secret"
+msgstr ""
+
+#: Config.php:79 Config.php:123
+msgid "Enable"
+msgstr "开启"
+
+#: Config.php:85
+msgid "Enable face to face payment"
+msgstr "开启当面付"
+
+#. URI of the plugin
+#. Author URI of the plugin
+msgid "https://www.xenice.com"
+msgstr ""
+
+#: xenice-pay.php:141
+msgid "Pay"
+msgstr "支付"
+
+#: Config.php:25
+msgid "pay"
+msgstr "支付"
+
+#: Config.php:27
+msgid "Pay Settings"
+msgstr "支付设置"
+
+#. Description of the plugin
+msgid "Rest api pay"
+msgstr ""
+
+#: Config.php:26
+msgid "Save Changes"
+msgstr "保存更改"
+
+#: xenice-pay.php:152
+msgid "Settings"
+msgstr "设置"
+
+#: xenice-pay.php:69
+msgid "Successfully copied to clipboard"
+msgstr "成功复制到剪贴板"
+
+#: xenice-pay.php:70
+msgid "The browser does not support link clicks to copy to the clipboard"
+msgstr "浏览器不支持单击链接复制到剪贴板"
+
+#: controllers/PayWaysController.php:116 controllers/PayWaysController.php:134
+#: controllers/PayWaysController.php:141 controllers/PayWaysController.php:159
+#: controllers/PayWaysController.php:182
+msgid "Wechat Pay"
+msgstr "微信支付"
+
+#: Config.php:116
+msgid "Wechat Xunhupay"
+msgstr "微信"
+
+#. Author of the plugin
+msgid "Xenice"
+msgstr ""
+
+#. Name of the plugin
+msgid "Xenice Pay"
+msgstr ""
+
+#: Config.php:113
+msgid "Xunhupay"
+msgstr "虎皮椒支付"

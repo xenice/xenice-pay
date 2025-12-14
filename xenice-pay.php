@@ -4,7 +4,7 @@
  * Plugin Name: Xenice Pay
  * Plugin URI: https://www.xenice.com
  * Description: Rest api pay
- * Version: 1.0.0
+ * Version: 1.0.3
  * Author: Xenice
  * Author URI: https://www.xenice.com
  * Text Domain: xenice-pay

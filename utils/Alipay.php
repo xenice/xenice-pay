@@ -36,7 +36,7 @@ class Alipay
         // $params->isUseAES = true; // 沙箱环境可能用不了AES加密
         // $params->aesKey = $GLOBALS['PAY_CONFIG']['aesKey'];
         // $params->appPrivateKeyFile = ''; // 证书文件，如果设置则这个优先使用
-        $params->apiDomain = 'https://openapi.alipaydev.com/gateway.do'; // 设为沙箱环境，如正式环境请把这行注释
+        //$params->apiDomain = 'https://openapi.alipaydev.com/gateway.do'; // 设为沙箱环境，如正式环境请把这行注释
         
         // SDK实例化，传入公共配置
         $pay = new \Yurun\PaySDK\AlipayApp\SDK($params);
