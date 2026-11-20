@@ -1,170 +1,158 @@
 <?php
-
 /**
  * Plugin Name: Xenice Pay
- * Plugin URI: https://www.xenice.com
- * Description: Rest api pay
- * Version: 1.0.3
+ * Plugin URI: https://www.xenice.com/xenice-pay/
+ * Description: 支付宝（公钥模式）与微信支付（API v3）WooCommerce 支付网关，不依赖任何第三方支付 SDK，直接调用官方接口。
+ * Version: 1.1.0
  * Author: Xenice
  * Author URI: https://www.xenice.com
  * Text Domain: xenice-pay
- * Domain Path: /languages
+ * Requires Plugins: woocommerce
+ * Requires at least: 6.0
+ * Requires PHP: 7.4
+ * WC requires at least: 7.0
+ * WC tested up to: 10.9
+ *
+ * @package Xenice_Pay
  */
 
-
-namespace xenice\pay;
-
- /**
- * autoload class
- */
-function __autoload($classname){
-    $classname = str_replace('\\','/',$classname);
-    $namespace = 'xenice/pay';
-    if(strpos($classname, $namespace) === 0){
-        $filename = str_replace($namespace, '', $classname);
-        require  __DIR__ .  $filename . '.php';
-    }
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
-
-
-
- /**
- * get option
- */
-function get($name, $key='xenice_pay')
-{
-    
-    static $option = [];
-    if(!$option){
-        $options = get_option($key)?:[];
-        foreach($options as $o){
-            $option = array_merge($option, $o);
-        }
-    }
-    return $option[$name]??'';
-}
-
-
- /**
- * set option
- */
-function set($name, $value, $key='xenice_pay')
-{
-    $options = get_option($key)?:[];
-    foreach($options as $id=>&$o){
-        if(isset($o[$name])){
-            $o[$name] = $value;
-            update_option($key, $options);
-            return;
-        }
-    }
-}
-
-
-
-function admin_footer()
-{
-    $msg = [
-        'success' => __('Successfully copied to clipboard', 'xenice-pay'),
-        'failed' => __('The browser does not support link clicks to copy to the clipboard', 'xenice-pay')
-    ];
-    echo <<<EOT
-<script>
-
-function xenice_pay_copy (obj) {
-var text = obj.href;
-var textArea = document.createElement("textarea");
-  textArea.style.position = 'fixed';
-  textArea.style.top = '0';
-  textArea.style.left = '0';
-  textArea.style.width = '2em';
-  textArea.style.height = '2em';
-  textArea.style.padding = '0';
-  textArea.style.border = 'none';
-  textArea.style.outline = 'none';
-  textArea.style.boxShadow = 'none';
-  textArea.style.background = 'transparent';
-  textArea.value = text;
-  document.body.appendChild(textArea);
-  textArea.select();
-
-  try {
-    var successful = document.execCommand('copy');
-    var msg = successful ? '{$msg['success']}' : '{$msg['failed']}';
-   alert(msg);
-  } catch (err) {
-    alert('{$msg['failed']}');
-  }
-
-  document.body.removeChild(textArea);
-}
-</script>
-EOT;
-    
-}
-
-
-
-function register()
-{
-    $controllers = [
-        'xenice\pay\controllers\PayWaysController',
-        'xenice\pay\controllers\PayNotifyController',
-    ];
-    
-    foreach($controllers as $class){
-        $class = '\\' . $class;
-        (new $class)->register_routes();
-    }
-}
-
+define( 'XENICE_PAY_VERSION', '1.0.0' );
+define( 'XENICE_PAY_FILE', __FILE__ );
+define( 'XENICE_PAY_DIR', plugin_dir_path( __FILE__ ) );
+define( 'XENICE_PAY_URL', plugin_dir_url( __FILE__ ) );
 
 /**
-* auto execute when active this plugin
-*/
-register_activation_hook( __FILE__, function(){
-    spl_autoload_register('xenice\pay\__autoload');
-    (new Config)->active();
-    
-    //(new models\Clients)->create();
-});
+ * 声明 HPOS（自定义订单表）兼容
+ */
+add_action(
+	'before_woocommerce_init',
+	function () {
+		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+		}
+	}
+);
 
+/**
+ * 加载插件
+ */
+function xenice_pay_bootstrap() {
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		add_action( 'admin_notices', 'xenice_pay_missing_woocommerce_notice' );
+		return;
+	}
 
-add_action( 'plugins_loaded', function(){
-    spl_autoload_register('xenice\pay\__autoload');
-    require __DIR__ . '/vendor/autoload.php';
-    $plugin_name = basename(__DIR__);
-    load_plugin_textdomain( $plugin_name, false , $plugin_name . '/languages/' );
-    // add setting menus
-    add_action( 'admin_menu', function(){
-        add_options_page(__('Pay','xenice-pay'), __('Pay','xenice-pay'), 'manage_options', 'xenice-pay', function(){
-            //var_dump(get('enable_title'));
-            (new Config)->show();
+	if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
+		return;
+	}
 
-        });
-        
-    });
-    
-    // Add setting button
-    $plugin = plugin_basename (__FILE__);
-    add_filter("plugin_action_links_$plugin" , function($links)use($plugin_name){
-        $settings_link = '<a href="options-general.php?page='.$plugin_name.'">' . __( 'Settings', 'xenice-pay') . '</a>' ;
-        array_push($links , $settings_link);
-        return $links;
-    });
-    
-    //new api\TestApi;
-    //new api\AuthApi;
-    
-    add_action('admin_footer', 'xenice\pay\admin_footer');
-    add_action('rest_api_init', 'xenice\pay\register', 30);
-    //add_filter( 'determine_current_user', 'xenice\auth\verify', 100);
-    
-});
+	require_once XENICE_PAY_DIR . 'includes/class-xenice-pay-qrcode.php';
+	require_once XENICE_PAY_DIR . 'includes/class-xenice-pay-gateway.php';
+	require_once XENICE_PAY_DIR . 'includes/class-xenice-pay-alipay-api.php';
+	require_once XENICE_PAY_DIR . 'includes/class-xenice-pay-alipay-gateway.php';
+	require_once XENICE_PAY_DIR . 'includes/class-xenice-pay-wechat-api.php';
+	require_once XENICE_PAY_DIR . 'includes/class-xenice-pay-wechat-gateway.php';
+}
+add_action( 'plugins_loaded', 'xenice_pay_bootstrap', 20 );
 
+/**
+ * 注册两个支付网关
+ *
+ * @param array $methods 网关类名列表
+ * @return array
+ */
+function xenice_pay_register_gateways( $methods ) {
+	$methods[] = 'Xenice_Pay_Alipay_Gateway';
+	$methods[] = 'Xenice_Pay_Wechat_Gateway';
+	return $methods;
+}
+add_filter( 'woocommerce_payment_gateways', 'xenice_pay_register_gateways' );
 
+/**
+ * 缺少 WooCommerce 时的提示
+ */
+function xenice_pay_missing_woocommerce_notice() {
+	echo '<div class="notice notice-error is-dismissible"><p>';
+	echo esc_html__( 'Xenice Pay 需要先安装并启用 WooCommerce。', 'xenice-pay' );
+	echo '</p></div>';
+}
 
+/**
+ * 轮询订单状态
+ */
+function xenice_pay_ajax_check_order() {
+	$order_id = isset( $_GET['order_id'] ) ? absint( $_GET['order_id'] ) : 0;
+	$key      = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
+	$order    = $order_id ? wc_get_order( $order_id ) : false;
 
+	if ( ! $order || ! hash_equals( $order->get_order_key(), $key ) ) {
+		wp_send_json_error( array( 'message' => 'invalid request' ), 403 );
+	}
 
+	wp_send_json_success(
+		array(
+			'status' => $order->get_status(),
+			'paid'   => $order->is_paid(),
+		)
+	);
+}
+add_action( 'wp_ajax_xenice_pay_check_order', 'xenice_pay_ajax_check_order' );
+add_action( 'wp_ajax_nopriv_xenice_pay_check_order', 'xenice_pay_ajax_check_order' );
 
+/**
+ * 后台提醒：网关已启用但缺少必要的密钥配置
+ */
+function xenice_pay_admin_config_notice() {
+	if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		return;
+	}
+
+	$warnings = array();
+
+	$alipay = get_option( 'woocommerce_xenice_pay_alipay_settings', array() );
+	if ( ! empty( $alipay['enabled'] ) && 'yes' === $alipay['enabled'] ) {
+		foreach ( array(
+			'app_id'              => 'App ID',
+			'merchant_private_key' => '应用私钥',
+			'alipay_public_key'   => '支付宝公钥',
+		) as $field => $label ) {
+			if ( empty( $alipay[ $field ] ) ) {
+				$warnings[] = sprintf( '支付宝：%s 未填写', $label );
+			}
+		}
+	}
+
+	$wechat = get_option( 'woocommerce_xenice_pay_wechat_settings', array() );
+	if ( ! empty( $wechat['enabled'] ) && 'yes' === $wechat['enabled'] ) {
+		foreach ( array(
+			'app_id'          => 'AppID',
+			'mch_id'          => '商户号',
+			'cert_serial_no'  => '商户证书序列号',
+			'merchant_private_key' => '商户私钥',
+			'api_v3_key'      => 'APIv3 密钥',
+			'wechat_public_key' => '微信支付公钥',
+		) as $field => $label ) {
+			if ( empty( $wechat[ $field ] ) ) {
+				$warnings[] = sprintf( '微信支付：%s 未填写', $label );
+			}
+		}
+	}
+
+	if ( empty( $warnings ) ) {
+		return;
+	}
+
+	printf(
+		'<div class="notice notice-warning"><p><strong>%s</strong></p><ul style="list-style:disc;margin-left:20px;">',
+		esc_html__( 'Xenice Pay 配置不完整，相关支付方式将无法使用：', 'xenice-pay' )
+	);
+	foreach ( $warnings as $warning ) {
+		echo '<li>' . esc_html( $warning ) . '</li>';
+	}
+	echo '</ul></div>';
+}
+add_action( 'admin_notices', 'xenice_pay_admin_config_notice' );
